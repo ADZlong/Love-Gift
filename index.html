@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Love Message</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #AB47BC;
+            font-family: 'Arial', sans-serif;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .love-message {
+            font-size: 2em;
+            color: white;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            animation: pulse 1.5s infinite;
+            position: absolute;
+            transition: all 0.5s ease-out;
+        }
+
+        .floating-emoji {
+            position: absolute;
+            font-size: 2em;
+            animation: float 3s ease-in-out infinite;
+            opacity: 0;
+            user-select: none;
+        }
+
+        .share-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #25D366;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+            z-index: 1000;
+        }
+
+        .share-button:hover {
+            transform: scale(1.05);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes float {
+            0% { 
+                transform: translateY(0) rotate(0deg) scale(1); 
+                opacity: 1; 
+            }
+            50% {
+                transform: translateY(-50vh) rotate(180deg) scale(1.5);
+                opacity: 0.8;
+            }
+            100% { 
+                transform: translateY(-100vh) rotate(360deg) scale(1); 
+                opacity: 0; 
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="love-message">
+        I LOVE YOU ANJEEEE ❤️ 😊
+    </div>
+
+    <button class="share-button" onclick="shareOnWhatsApp()">
+        Share on WhatsApp 💚
+    </button>
+
+    <script>
+        const message = document.querySelector('.love-message');
+        const emojis = ['❤️', '💖', '💝', '💕', '💓', '💗', '💘', '💞', '😊', '🥰', '😍', '💋'];
+        
+        function getRandomPosition() {
+            const maxX = window.innerWidth - message.offsetWidth;
+            const maxY = window.innerHeight - message.offsetHeight;
+            const randomX = Math.floor(Math.random() * maxX);
+            const randomY = Math.floor(Math.random() * maxY);
+            return { x: randomX, y: randomY };
+        }
+
+        function getRandomEmoji() {
+            return emojis[Math.floor(Math.random() * emojis.length)];
+        }
+
+        function createFloatingEmoji(x, y) {
+            const emoji = document.createElement('div');
+            emoji.className = 'floating-emoji';
+            emoji.innerHTML = getRandomEmoji();
+            emoji.style.left = x + 'px';
+            emoji.style.top = y + 'px';
+            emoji.style.animationDuration = (2 + Math.random() * 2) + 's';
+            document.body.appendChild(emoji);
+
+            setTimeout(() => {
+                emoji.remove();
+            }, 4000);
+        }
+
+        function shareOnWhatsApp() {
+            // Get the current URL
+            const url = window.location.href;
+            // Create the WhatsApp share URL
+            const whatsappUrl = `https://wa.me/?text=Check out this cute love message I made for you! 💕 ${url}`;
+            // Open WhatsApp share link in a new tab
+            window.open(whatsappUrl, '_blank');
+        }
+
+        document.body.addEventListener('click', function(e) {
+            // Don't trigger if clicking the share button
+            if (e.target.closest('.share-button')) return;
+
+            // Move text randomly
+            const newPosition = getRandomPosition();
+            message.style.left = newPosition.x + 'px';
+            message.style.top = newPosition.y + 'px';
+
+            // Create multiple floating emojis
+            for (let i = 0; i < 5; i++) {
+                const offsetX = (Math.random() - 0.5) * 100;
+                const offsetY = (Math.random() - 0.5) * 100;
+                createFloatingEmoji(e.clientX + offsetX, e.clientY + offsetY);
+            }
+
+            // Add a bounce effect to the message
+            message.style.animation = 'none';
+            setTimeout(() => {
+                message.style.animation = 'pulse 1.5s infinite';
+            }, 10);
+        });
+    </script>
+</body>
+</html> 

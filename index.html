@@ -2,12 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Love Message</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
             margin: 0;
             height: 100vh;
+            height: 100dvh; /* Dynamic viewport height for mobile */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -15,24 +23,29 @@
             font-family: 'Arial', sans-serif;
             cursor: pointer;
             overflow: hidden;
+            touch-action: manipulation;
         }
 
         .love-message {
-            font-size: 2em;
+            font-size: clamp(1.5em, 5vw, 2em); /* Responsive font size */
             color: white;
             text-align: center;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
             animation: pulse 1.5s infinite;
             position: absolute;
             transition: all 0.5s ease-out;
+            padding: 20px;
+            max-width: 90vw; /* Prevent text from overflowing on small screens */
+            word-wrap: break-word;
         }
 
         .floating-emoji {
             position: absolute;
-            font-size: 2em;
+            font-size: clamp(1.5em, 4vw, 2em); /* Responsive emoji size */
             animation: float 3s ease-in-out infinite;
             opacity: 0;
             user-select: none;
+            pointer-events: none;
         }
 
         .share-button {
@@ -44,7 +57,7 @@
             border: none;
             padding: 15px 25px;
             border-radius: 50px;
-            font-size: 1.2em;
+            font-size: clamp(1em, 3vw, 1.2em); /* Responsive button text */
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -52,10 +65,17 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             transition: transform 0.2s;
             z-index: 1000;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .share-button:hover {
-            transform: scale(1.05);
+        .share-button:active {
+            transform: scale(0.95);
+        }
+
+        @media (hover: hover) {
+            .share-button:hover {
+                transform: scale(1.05);
+            }
         }
 
         @keyframes pulse {
@@ -83,9 +103,17 @@
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-20px); }
         }
+
+        /* Prevent text selection */
+        .no-select {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
     </style>
 </head>
-<body>
+<body class="no-select">
     <div class="love-message">
         I LOVE YOU ANJEEEE ❤️ 😊
     </div>
@@ -125,17 +153,19 @@
         }
 
         function shareOnWhatsApp() {
-            // Get the current URL
             const url = window.location.href;
-            // Create the WhatsApp share URL
             const whatsappUrl = `https://wa.me/?text=Check out this cute love message I made for you! 💕 ${url}`;
-            // Open WhatsApp share link in a new tab
             window.open(whatsappUrl, '_blank');
         }
 
-        document.body.addEventListener('click', function(e) {
+        // Handle both click and touch events
+        function handleInteraction(e) {
             // Don't trigger if clicking the share button
             if (e.target.closest('.share-button')) return;
+
+            // Get coordinates from either mouse or touch event
+            const x = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+            const y = e.clientY || (e.touches && e.touches[0].clientY) || 0;
 
             // Move text randomly
             const newPosition = getRandomPosition();
@@ -146,7 +176,7 @@
             for (let i = 0; i < 5; i++) {
                 const offsetX = (Math.random() - 0.5) * 100;
                 const offsetY = (Math.random() - 0.5) * 100;
-                createFloatingEmoji(e.clientX + offsetX, e.clientY + offsetY);
+                createFloatingEmoji(x + offsetX, y + offsetY);
             }
 
             // Add a bounce effect to the message
@@ -154,6 +184,22 @@
             setTimeout(() => {
                 message.style.animation = 'pulse 1.5s infinite';
             }, 10);
+        }
+
+        // Add event listeners for both click and touch
+        document.body.addEventListener('click', handleInteraction);
+        document.body.addEventListener('touchstart', handleInteraction);
+
+        // Prevent default touch behaviors
+        document.body.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+
+        // Handle orientation changes
+        window.addEventListener('resize', function() {
+            const newPosition = getRandomPosition();
+            message.style.left = newPosition.x + 'px';
+            message.style.top = newPosition.y + 'px';
         });
     </script>
 </body>
